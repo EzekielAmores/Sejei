@@ -1,0 +1,67 @@
+<!-- frontend/game.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz Game</title>
+  <style>
+    body { font-family:sans-serif; text-align:center; padding:20px; }
+    .balloon { display:inline-block; margin:10px; padding:20px; background:#f88; border-radius:50%; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <h1>Quiz Time!</h1>
+  <div id="game">
+    <h2 id="question"></h2>
+    <div id="answers"></div>
+    <p>Score: <span id="score">0</span></p>
+  </div>
+
+  <div id="finish" style="display:none;">
+    <h2>Quiz Complete!</h2>
+    <p>Your Score: <span id="finalScore"></span></p>
+    <input id="playerName" placeholder="Your Name"/><button onclick="submitScore()">Submit Score</button>
+  </div>
+
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <script>
+    const socket = io("http://localhost:3000");
+    const questions = [
+      { question: "Name?", answers: ["A", "B", "C"], correct: 0 },
+      { question: "Where?", answers: ["X", "Y", "Z"], correct: 2 }
+    ];
+    let score=0, qi=0;
+
+    function showQ() {
+      if (qi >= questions.length) return finishQuiz();
+      const q=questions[qi];
+      document.getElementById("question").innerText = q.question;
+      const divA=document.getElementById("answers");
+      divA.innerHTML = "";
+      q.answers.forEach((a,i) => {
+        const b=document.createElement('div');
+        b.className="balloon";
+        b.innerText=a;
+        b.onclick = () => { if(i===q.correct) score++; qi++; showQ(); }
+        divA.appendChild(b);
+      });
+      document.getElementById("score").innerText = score;
+    }
+
+    function finishQuiz(){
+      document.getElementById("game").style.display="none";
+      document.getElementById("finish").style.display="block";
+      document.getElementById("finalScore").innerText = score;
+    }
+
+    function submitScore(){
+      const name=document.getElementById("playerName").value.trim();
+      if(!name) return alert("Enter a name");
+      socket.emit('submit-score', { name, score });
+      alert("Score submitted!");
+    }
+
+    showQ();
+  </script>
+</body>
+</html>

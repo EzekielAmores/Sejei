@@ -1,0 +1,21 @@
+<!-- frontend/admin.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Master Dashboard</title>
+  <style>body{font-family:sans-serif;padding:20px;} li{margin:5px 0;}</style>
+</head>
+<body>
+  <h1>Live Leaderboard</h1>
+  <ol id="board"></ol>
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <script>
+    const socket = io("http://localhost:3000");
+    socket.on('update-scores', data => {
+      const ol = document.getElementById("board");
+      ol.innerHTML = data.map(e => `<li>${e.name}: ${e.score}</li>`).join("");
+    });
+  </script>
+</body>
+</html>

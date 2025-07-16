@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Balloon Quiz Game</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom, #c2e9fb, #a1c4fd);
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+    h2 {
+      text-align: center;
+      margin: 20px 10px 10px;
+      color: #333;
+      font-size: 1.2rem;
+    }
+    #score, #highScore {
+      text-align: center;
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+    .balloon {
+      position: absolute;
+      width: 70px;
+      height: 90px;
+      background: radial-gradient(circle at 30% 30%, #ff9a9e, #fad0c4);
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 0.8rem;
+      cursor: pointer;
+      animation: floatUp 5s linear forwards;
+    }
+    @keyframes floatUp {
+      0% { bottom: -120px; opacity: 0; }
+      10% { opacity: 1; }
+      100% { bottom: 110%; opacity: 0; }
+    }
+
+    #endScreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      display: none;
+    }
+    #endScreen h2 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+    #endScreen button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      background: #4CAF50;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    #endScreen button:hover {
+      background: #45a049;
+    }
+
+    #leaderboard {
+      margin-top: 20px;
+    }
+    #leaderboard h3 {
+      margin-bottom: 5px;
+    }
+    #leaderboard ol {
+      padding-left: 20px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <h2 id="question">Loading question...</h2>
+  <div id="score">Score: 0</div>
+  <div id="highScore">High Score: 0</div>
+
+  <div id="endScreen">
+    <h2>Quiz Complete!</h2>
+    <p id="finalScore"></p>
+    <p>Enter your name:</p>
+    <input type="text" id="playerName" placeholder="Your name" />
+    <button onclick="saveScore()">Save Score</button>
+    <div id="leaderboard">
+      <h3>🏆 Leaderboard</h3>
+      <ol id="leaderboardList"></ol>
+    </div>
+    <button onclick="restartGame()">Play Again</button>
+    <button onclick="window.location.href='index.html'">Back to Menu</button>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        question: "What is the name of the main character?",
+        answers: ["John", "Emily", "Max"],
+        correct: 1
+      },
+      {
+        question: "Where did the story take place?",
+        answers: ["Forest", "City", "Ocean"],
+        correct: 0
+      },
+      // Add more questions as needed
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let highScore = localStorage.getItem('highScore') || 0;
+    document.getElementById("highScore").innerText = "High Score: " + highScore;
+
+    function showQuestion() {
+      if (currentQuestion >= questions.length) {
+        endGame();
+        return;
+      }
+
+      document.getElementById("question").innerText = questions[currentQuestion].question;
+      document.getElementById("score").innerText = `Score: ${score}`;
+
+      spawnBalloons();
+    }
+
+    function spawnBalloons() {
+      document.querySelectorAll('.balloon').forEach(b => b.remove());
+      const answers = questions[currentQuestion].answers;
+
+      answers.forEach((answer, i) => {
+        const balloon = document.createElement('div');
+        balloon.className = 'balloon';
+        balloon.style.left = `${20 + i * 25}%`;
+        balloon.innerText = answer;
+
+        balloon.addEventListener('click', () => {
+          if (i === questions[currentQuestion].correct) {
+            score++;
+          }
+          currentQuestion++;
+          showQuestion();
+        });
+
+        document.body.appendChild(balloon);
+      });
+    }
+
+    function endGame() {
+      document.querySelectorAll('.balloon').forEach(b => b.remove());
+      document.getElementById("endScreen").style.display = 'flex';
+      document.getElementById("finalScore").innerText = `Your Score: ${score} / ${questions.length}`;
+
+      if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('highScore', highScore);
+      }
+
+      updateLeaderboardUI();
+    }
+
+    function saveScore() {
+      const name = document.getElementById("playerName").value.trim();
+      if (!name) {
+        alert("Please enter your name.");
+        return;
+      }
+
+      const leaderboard = JSON.parse(localStorage.getItem("leaderboard") || "[]");
+      leaderboard.push({ name, score });
+      leaderboard.sort((a, b) => b.score - a.score);
+      localStorage.setItem("leaderboard", JSON.stringify(leaderboard.slice(0, 5))); // Top 5
+      updateLeaderboardUI();
+    }
+
+    function updateLeaderboardUI() {
+      const list = document.getElementById("leaderboardList");
+      list.innerHTML = "";
+      const leaderboard = JSON.parse(localStorage.getItem("leaderboard") || "[]");
+      leaderboard.forEach(entry => {
+        const item = document.createElement("li");
+        item.innerText = `${entry.name} - ${entry.score}`;
+        list.appendChild(item);
+      });
+    }
+
+    function restartGame() {
+      currentQuestion = 0;
+      score = 0;
+      document.getElementById("endScreen").style.display = 'none';
+      document.getElementById("playerName").value = "";
+      showQuestion();
+    }
+
+    showQuestion();
+  </script>
+</body>
+</html>
+
