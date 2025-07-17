@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Main Page</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="main-screen">
+    <h1 class="title">Welcome to the Portal</h1>
+    <div class="button-group">
+      <button onclick="selectRole('teacher')">I'm a Teacher</button>
+      <button onclick="selectRole('student')">I'm a Student</button>
+    </div>
+  </div>
+
+  <div id="name-screen" style="display: none;">
+    <h2>Enter Your Name</h2>
+    <input type="text" id="nameInput" placeholder="Your Name">
+    <button onclick="goToDashboard()">Enter</button>
+  </div>
+
+  <script>
+    let selectedRole = '';
+
+    function selectRole(role) {
+      selectedRole = role;
+      document.getElementById('main-screen').style.display = 'none';
+      document.getElementById('name-screen').style.display = 'block';
+    }
+
+    function goToDashboard() {
+      const name = document.getElementById('nameInput').value.trim();
+      if (!name) {
+        alert("Please enter a name.");
+        return;
+      }
+
+      const targetPage = 'dashboard.html';
+      const params = new URLSearchParams({
+        role: selectedRole,
+        name: name
+      });
+
+      window.location.href = `${targetPage}?${params.toString()}`;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Story Page</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="story.js"></script>
+</head>
+<body>
+  <div id="student-view" style="display: none;">
+    <h1>Student Story</h1>
+    <div class="score-panel">
+      <p><strong>Score:</strong> <span id="score">-</span></p>
+      <p><strong>Attempts:</strong> <span id="attempts">-</span></p>
+    </div>
+    <div class="story">
+      <h2 id="student-title"></h2>
+      <p id="student-text"></p>
+    </div>
+    <div class="button-group">
+      <button onclick="window.history.back()">Back</button>
+      <button onclick="window.location.href='quiz.html'">Continue to Quiz</button>
+    </div>
+  </div>
+
+  <div id="teacher-view" style="display: none;">
+    <h1>Story Management</h1>
+    <div id="story">
+      <h2 id="story-title"></h2>
+      <p id="story-text"></p>
+    </div>
+    <div id="edit-story" style="display: none;">
+      <input type="text" id="edit-title" style="width: 60%; font-size: 1.2rem;"><br><br>
+      <textarea id="edit-text" rows="5" style="width: 80%; font-size: 1rem;"></textarea>
+    </div>
+    <div class="button-group">
+      <button id="editBtn" onclick="toggleEdit()">Edit</button>
+      <button id="saveBtn" style="display: none;" onclick="saveStory()">Save</button>
+      <button id="cancelBtn" style="display: none;" onclick="cancelEdit()">Cancel Edit</button>
+      <button onclick="window.history.back()">Back</button>
+    </div>
+    <h2 class="section-header">Quiz Questions</h2>
+    <div id="quiz-panel"></div>
+    <div style="text-align: center; margin-bottom: 40px;">
+      <button onclick="createQuestion()">Create New Question</button>
+    </div>
+    <h3 class="section-header">Student Grades</h3>
+    <table>
+      <thead><tr><th>Full Name</th><th>Score</th></tr></thead>
+      <tbody id="grade-table-body">
+        <tr><td>Anna Rivera</td><td>9</td></tr>
+        <tr><td>James Tan</td><td>7</td></tr>
+        <tr><td>Elijah Cruz</td><td>10</td></tr>
+        <tr><td>Mika Santos</td><td>6</td></tr>
+        <tr><td>David Lee</td><td>8</td></tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
