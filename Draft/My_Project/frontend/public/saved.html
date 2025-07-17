@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Saved Inputs</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Saved Inputs</h1>
+  <button onclick="location.href='index.html'">Back to Input Page</button>
+  <ul id="list"></ul>
+  <script>
+    async function fetchInputs() {
+      const res = await fetch('/api/inputs');
+      const data = await res.json();
+      const list = document.getElementById('list');
+      list.innerHTML = '';
+      data.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        list.appendChild(li);
+      });
+    }
+    fetchInputs();
+  </script>
+</body>
+</html>

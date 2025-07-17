@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Story</title>
+</head>
+<body>
+
+  <h1>Student Story</h1>
+
+  <div class="score-panel">
+    <p><strong>Score:</strong> 8/10</p>
+    <p><strong>Attempts:</strong> 2</p>
+
+    <!-- 
+      TODO: Replace placeholders above with dynamic values from localStorage or backend.
+      Example JavaScript for localStorage:
+      
+      const score = localStorage.getItem('quizScore');
+      const attempts = localStorage.getItem('quizAttempts');
+      document.querySelector('.score-panel').innerHTML = `
+        <p><strong>Score:</strong> ${score}/10</p>
+        <p><strong>Attempts:</strong> ${attempts}</p>
+      `;
+    -->
+  </div>
+
+  <div class="story">
+    <h2>The Mysterious Forest</h2>
+    <p>
+      Once upon a time in a mysterious forest, a group of travelers found themselves surrounded 
+      by trees that whispered secrets. The forest shifted with each step they took, 
+      as though guiding — or misleading — them.
+    </p>
+  </div>
+
+  <div class="button-group">
+    <button onclick="window.location.href='student.html'">Back to Student Panel</button>
+    <button onclick="window.location.href='quiz.html'">Continue to Quiz</button>
+  </div>
+
+</body>
+</html>

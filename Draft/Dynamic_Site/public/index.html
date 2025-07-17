@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dynamic Input Saver</title>
+  <link rel="stylesheet" href="shared.css">
+</head>
+<body>
+  <h1>Save Your Input</h1>
+  <input type="text" id="userInput" placeholder="Enter something...">
+  <button onclick="submitInput()">Submit</button>
+  <button onclick="location.href='saved.html'">Go to Saved Inputs Page</button>
+
+  <ul id="list"></ul>
+
+  <script>
+    async function fetchInputs() {
+      const res = await fetch('/inputs');
+      const data = await res.json();
+      const list = document.getElementById('list');
+      list.innerHTML = '';
+      data.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        list.appendChild(li);
+      });
+    }
+
+    async function submitInput() {
+      const input = document.getElementById('userInput').value;
+      if (!input.trim()) return;
+      await fetch('/input', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input })
+      });
+      document.getElementById('userInput').value = '';
+      fetchInputs();
+    }
+
+    fetchInputs();
+  </script>
+</body>
+</html>

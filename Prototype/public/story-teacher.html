@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Teacher Story View</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .button-group button {
+      margin: 5px;
+      padding: 10px 20px;
+    }
+
+    table {
+      margin-top: 30px;
+      border-collapse: collapse;
+      width: 80%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    table, th, td {
+      border: 1px solid #999;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: center;
+    }
+
+    .quiz-item {
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      padding: 15px;
+      width: 80%;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: left;
+      background: #f9f9f9;
+    }
+
+    .quiz-controls button {
+      margin-right: 10px;
+    }
+
+    .edit-area {
+      margin-top: 10px;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    .quiz-item ul {
+    margin: 5px 0 10px 20px;
+    padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Story Management</h1>
+
+  <!-- Story Panel -->
+  <div id="story">
+    <h2 id="story-title">The Lost Forest</h2>
+    <p id="story-text">Once upon a time, a group of travelers found themselves lost in a mysterious forest that seemed to shift and change with every step.</p>
+  </div>
+
+  <div id="edit-story" style="display: none;">
+    <input type="text" id="edit-title" style="width: 60%; font-size: 1.2rem;"><br><br>
+    <textarea id="edit-text" rows="5" style="width: 80%; font-size: 1rem;"></textarea>
+  </div>
+
+  <div class="button-group">
+    <button id="editBtn" onclick="toggleEdit()">Edit</button>
+    <button id="saveBtn" style="display: none;" onclick="saveStory()">Save</button>
+    <button id="cancelBtn" style="display: none;" onclick="cancelEdit()">Cancel Edit</button>
+    <button onclick="goBack()">Back to Admin</button>
+  </div>
+
+  <!-- Quiz Panel -->
+  <h2 class="section-header">Quiz Questions</h2>
+  <div id="quiz-panel"></div>
+  <div style="text-align: center; margin-bottom: 40px;">
+    <button onclick="createQuestion()">Create New Question</button>
+  </div>
+
+  <!-- Student Grades -->
+  <h3 class="section-header">Student Grades</h3>
+  <table>
+    <tr>
+      <th>Full Name</th>
+      <th>Score</th>
+    </tr>
+    <tr><td>Anna Rivera</td><td>9</td></tr>
+    <tr><td>James Tan</td><td>7</td></tr>
+    <tr><td>Elijah Cruz</td><td>10</td></tr>
+    <tr><td>Mika Santos</td><td>6</td></tr>
+    <tr><td>David Lee</td><td>8</td></tr>
+  </table>
+
+  <script>
+    // Story logic
+    function toggleEdit() {
+      const currentTitle = document.getElementById("story-title").textContent;
+      const currentText = document.getElementById("story-text").textContent;
+
+      document.getElementById("edit-title").value = currentTitle;
+      document.getElementById("edit-text").value = currentText;
+
+      document.getElementById("story").style.display = "none";
+      document.getElementById("edit-story").style.display = "block";
+      document.getElementById("editBtn").style.display = "none";
+      document.getElementById("saveBtn").style.display = "inline-block";
+      document.getElementById("cancelBtn").style.display = "inline-block";
+    }
+
+    function saveStory() {
+      const newTitle = document.getElementById("edit-title").value;
+      const newText = document.getElementById("edit-text").value;
+
+      document.getElementById("story-title").textContent = newTitle;
+      document.getElementById("story-text").textContent = newText;
+
+      cancelEdit();
+    }
+
+    function cancelEdit() {
+      document.getElementById("story").style.display = "block";
+      document.getElementById("edit-story").style.display = "none";
+      document.getElementById("editBtn").style.display = "inline-block";
+      document.getElementById("saveBtn").style.display = "none";
+      document.getElementById("cancelBtn").style.display = "none";
+    }
+
+    function goBack() {
+      window.location.href = "teacher.html";
+    }
+
+    // Quiz logic
+    let quizData = [
+        {
+        question: "What kind of place did the travelers get lost in?",
+        correct: "A mysterious forest",
+        wrong: ["A desert", "A city", "A mountain"],
+        editing: false
+        },
+        {
+        question: "What was strange about the forest?",
+        correct: "It shifted and changed with every step",
+        wrong: ["It was always dark", "It was filled with fog", "It had no animals"],
+        editing: false
+        }
+    ];
+
+    function renderQuiz() {
+        const panel = document.getElementById("quiz-panel");
+        panel.innerHTML = "";
+
+        quizData.forEach((q, i) => {
+        const div = document.createElement("div");
+        div.className = "quiz-item";
+
+        if (q.editing) {
+            div.innerHTML = `
+            <strong>Question ${i + 1}:</strong><br>
+            <input type="text" id="edit-q-${i}" value="${q.question}" style="width: 100%; margin-bottom: 10px;"><br>
+            
+            <strong>Correct Answer:</strong><br>
+            <input type="text" id="edit-correct-${i}" value="${q.correct}" style="width: 100%; margin-bottom: 10px;"><br>
+
+            <strong>Wrong Answer 1:</strong><br>
+            <input type="text" id="edit-wrong-${i}-0" value="${q.wrong[0] || ''}" style="width: 100%; margin-bottom: 5px;"><br>
+            <strong>Wrong Answer 2:</strong><br>
+            <input type="text" id="edit-wrong-${i}-1" value="${q.wrong[1] || ''}" style="width: 100%; margin-bottom: 5px;"><br>
+            <strong>Wrong Answer 3:</strong><br>
+            <input type="text" id="edit-wrong-${i}-2" value="${q.wrong[2] || ''}" style="width: 100%; margin-bottom: 10px;"><br>
+
+            <button onclick="saveQuestion(${i})">Save</button>
+            <button onclick="cancelEdit(${i})">Cancel</button>
+            `;
+        } else {
+            div.innerHTML = `
+            <strong>Question ${i + 1}:</strong> <span>${q.question}</span><br>
+            <strong>Correct Answer:</strong> <span>${q.correct}</span><br>
+            <strong>Wrong Answers:</strong>
+            <ul>
+                ${q.wrong.map(ans => `<li>${ans}</li>`).join("")}
+            </ul>
+            <div class="quiz-controls">
+                <button onclick="editQuestion(${i})">Edit</button>
+                <button onclick="deleteQuestion(${i})">Delete</button>
+            </div>
+            `;
+        }
+
+        panel.appendChild(div);
+        });
+    }
+
+    function editQuestion(index) {
+        quizData[index].editing = true;
+        renderQuiz();
+    }
+
+    function saveQuestion(index) {
+        const newQ = document.getElementById(`edit-q-${index}`).value.trim();
+        const newC = document.getElementById(`edit-correct-${index}`).value.trim();
+
+        const newWrongs = [
+        document.getElementById(`edit-wrong-${index}-0`).value.trim(),
+        document.getElementById(`edit-wrong-${index}-1`).value.trim(),
+        document.getElementById(`edit-wrong-${index}-2`).value.trim()
+        ];
+
+        if (!newQ || !newC || newWrongs.some(w => !w)) {
+        alert("Please complete the question and all answer fields.");
+        return;
+        }
+
+        quizData[index] = {
+        question: newQ,
+        correct: newC,
+        wrong: newWrongs,
+        editing: false
+        };
+
+        renderQuiz();
+    }
+
+    function cancelEdit(index) {
+        quizData[index].editing = false;
+        renderQuiz();
+    }
+
+    function deleteQuestion(index) {
+        if (confirm("Delete this question?")) {
+        quizData.splice(index, 1);
+        renderQuiz();
+        }
+    }
+
+    function createQuestion() {
+        quizData.push({
+        question: "",
+        correct: "",
+        wrong: ["", "", ""],
+        editing: true
+        });
+        renderQuiz();
+    }
+
+    renderQuiz();
+  </script>
+</body>
+</html>

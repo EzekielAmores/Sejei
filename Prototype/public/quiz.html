@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 600px;
+      margin: 30px auto;
+      padding: 20px;
+    }
+    .question-panel {
+      display: none;
+    }
+    .question-panel.active {
+      display: block;
+    }
+    .question-title {
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+    }
+    .option-btn {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background-color: #f0f0f0;
+      cursor: pointer;
+      text-align: left;
+    }
+    .option-btn:hover {
+      background-color: #e0e0e0;
+    }
+    #feedback {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    #next-btn {
+      margin-top: 15px;
+    }
+    #result-panel {
+      display: none;
+      border: 2px solid #4caf50;
+      background: #e8f5e9;
+      padding: 20px;
+      margin-top: 30px;
+      text-align: center;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Story Quiz</h1>
+
+  <div id="quiz-container"></div>
+
+  <div id="result-panel">
+    <h2 id="score-display"></h2>
+    <button onclick="window.location.href='story-student.html'">Return to Story</button>
+  </div>
+
+  <script>
+    const quizData = [
+      {
+        question: "What kind of place did the travelers get lost in?",
+        correct: "A mysterious forest",
+        wrong: ["A desert", "A city", "A mountain"]
+      },
+      {
+        question: "What was strange about the forest?",
+        correct: "It shifted and changed with every step",
+        wrong: ["It was always dark", "It was filled with fog", "It had no animals"]
+      }
+    ];
+
+    const container = document.getElementById("quiz-container");
+    let currentQuestion = 0;
+    let score = 0;
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function showQuestion(index) {
+      const qData = quizData[index];
+      const answers = shuffle([qData.correct, ...qData.wrong]);
+
+      container.innerHTML = `
+        <div class="question-panel active">
+          <div class="question-title">Q${index + 1}: ${qData.question}</div>
+          ${answers.map(ans => `
+            <button class="option-btn">${ans}</button>
+          `).join('')}
+          <div id="feedback"></div>
+          <button id="next-btn" style="display:none;"></button>
+        </div>
+      `;
+
+      const buttons = container.querySelectorAll(".option-btn");
+      const feedback = container.querySelector("#feedback");
+      const nextBtn = container.querySelector("#next-btn");
+
+      buttons.forEach(button => {
+        button.addEventListener("click", () => {
+          // Disable all options after answer
+          buttons.forEach(b => b.disabled = true);
+          const isCorrect = button.textContent === qData.correct;
+          if (isCorrect) {
+            feedback.textContent = "✅ Correct!";
+            feedback.style.color = "green";
+            score++;
+          } else {
+            feedback.textContent = "❌ Incorrect!";
+            feedback.style.color = "red";
+          }
+
+          // Show next or finish button
+          nextBtn.style.display = "inline-block";
+          nextBtn.textContent = index + 1 === quizData.length ? "Finish Quiz" : "Next Question";
+          nextBtn.onclick = () => {
+            currentQuestion++;
+            if (currentQuestion < quizData.length) {
+              showQuestion(currentQuestion);
+            } else {
+              showResults();
+            }
+          };
+        });
+      });
+    }
+
+    function showResults() {
+      container.innerHTML = "";
+      const resultPanel = document.getElementById("result-panel");
+      const scoreDisplay = document.getElementById("score-display");
+      resultPanel.style.display = "block";
+      scoreDisplay.textContent = `You scored ${score} out of ${quizData.length}!`;
+    }
+
+    // Start the quiz
+    showQuestion(currentQuestion);
+  </script>
+</body>
+</html>
