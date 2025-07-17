@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Reading Comprehension Game</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body {
+      height:100%; width:100%;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background:#e9e2d0;
+      display:flex; justify-content:center; align-items:center;
+    }
+    .panel {
+      width:100vw; height:100vh;
+      background:#d4a66a;
+      border:20px solid #8b4f25;
+      box-shadow: inset -10px -10px 0 #5c2c0d;
+      position:relative;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+    }
+    .panel::before {
+      content: attr(data-title);
+      position:absolute; top:20px; left:50%; transform:translateX(-50%);
+      background:#8b4f25; color:#fff0c2;
+      padding:10px 30px; font-weight:bold;
+      border-radius:12px; font-size:30px;
+      box-shadow:0 3px 5px rgba(0,0,0,0.4);
+    }
+    .hidden { display:none; }
+    .buttons { display:flex; flex-wrap:wrap; gap:20px; justify-content:center; align-items:center; width:100%; padding:20px; }
+    .btn {
+      background: linear-gradient(to bottom,#b76e2a,#8b4f25);
+      color:#fff0c2; padding:20px;
+      border:4px solid #5c2c0d;
+      border-radius:14px; cursor:pointer;
+      font-size:24px; font-weight:bold;
+      min-width:180px;
+      transition:transform .1s;
+    }
+    .btn:hover { transform:scale(1.05); }
+    .btn:active { transform:scale(.95); }
+    input, textarea {
+      padding:12px; font-size:18px;
+      width:100%; margin-top:10px;
+      border:3px solid #5c2c0d;
+      border-radius:10px;
+    }
+    .back-button {
+      position:absolute; top:20px; left:20px;
+      background:linear-gradient(to bottom,#b76e2a,#8b4f25);
+      padding:15px 25px; font-size:24px;
+      border:4px solid #5c2c0d; border-radius:14px;
+      color:#fff0c2; cursor:pointer;
+    }
+    .story-text {
+      padding: 20px;
+      width: 80%;
+      height: 60%;
+      overflow-y: auto;
+      background: #fff0c2;
+      border-radius: 10px;
+      color: #5c2c0d;
+      font-size: 22px;
+    }
+    #scoreDisplay {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: #8b4f25;
+      padding: 10px 20px;
+      border-radius: 10px;
+      color: #fff0c2;
+      font-size: 24px;
+      border: 3px solid #5c2c0d;
+    }
+    .balloon {
+      position: absolute; bottom:-100px;
+      background: pink; padding:10px;
+      border-radius:50%; cursor:pointer;
+      animation: rise 5s linear forwards;
+    }
+    @keyframes rise { to { bottom:110%; } }
+  </style>
+</head>
+<body>
+
+  <!-- PAGE 1: Role Selection -->
+  <div class="panel" id="page1" data-title="Welcome">
+    <h1 style="font-size:60px; color:#5c2c0d; margin-bottom:40px;">Reading Comprehension Game</h1>
+    <div class="buttons">
+      <button class="btn" onclick="selectRole('student')">I am a Student</button>
+      <button class="btn" onclick="selectRole('teacher')">I am a Teacher</button>
+    </div>
+  </div>
+
+  <!-- PAGE 2: Login Input -->
+  <div class="panel hidden" id="page2" data-title="Enter Info">
+    <button class="btn back-button" onclick="goToPage('page1')">← Back</button>
+    <div class="buttons" style="flex-direction: column;">
+      <label id="inputLabel" style="font-size: 32px; color: #5c2c0d;">Enter Info</label>
+      <input type="text" id="userInput" placeholder="Your answer here..." />
+      <button class="btn" style="margin-top: 20px;" onclick="handleLogin()">Continue</button>
+    </div>
+  </div>
+
+  <!-- PAGE 3: Main Menu -->
+  <div class="panel hidden" id="menuPage" data-title="Main Menu">
+    <div class="buttons" id="menuButtons"></div>
+  </div>
+
+  <!-- PAGE 4: Story Page -->
+  <div class="panel hidden" id="storyPage" data-title="Story">
+    <button class="btn back-button" onclick="goToPage('menuPage')">← Menu</button>
+    <div class="story-text" id="storyText">[Story will load here]</div>
+    <button class="btn" style="position:absolute; bottom:40px; right:40px;" onclick="doneReading()">Done Reading</button>
+  </div>
+
+  <!-- PAGE 5: Game Page -->
+  <div class="panel hidden" id="gamePage" data-title="Quiz Game">
+    <button class="btn back-button" onclick="goToPage('menuPage')">← Menu</button>
+    <div id="scoreDisplay">Score: 0</div>
+    <h2 id="questionText" style="color:#5c2c0d; margin-top:80px;"></h2>
+    <div style="width:80%; height:60%; position:relative;" id="balloonArea"></div>
+  </div>
+
+  <!-- PAGE 6: Editor Page -->
+  <div class="panel hidden" id="editorPage" data-title="Edit Content">
+    <button class="btn back-button" onclick="goToPage('menuPage')">← Menu</button>
+    <div style="width: 80%; max-width: 600px; display: flex; flex-direction: column; align-items: center;">
+      <h2 style="color: #5c2c0d; margin: 10px 0;">Edit Story</h2>
+      <textarea id="editStory" rows="6" placeholder="Enter story here..."></textarea>
+
+      <h2 style="color: #5c2c0d; margin: 20px 0 10px;">Edit Questions</h2>
+      <div id="questionInputs">
+        <input type="text" placeholder="Question" id="qText">
+        <input type="text" placeholder="Choice 1" id="choice1">
+        <input type="text" placeholder="Choice 2" id="choice2">
+        <input type="text" placeholder="Choice 3" id="choice3">
+        <input type="number" min="1" max="3" placeholder="Correct Answer # (1-3)" id="correctIndex">
+      </div>
+
+      <button class="btn" style="margin-top: 15px;" onclick="addQuestion()">+ Add Question</button>
+      <button class="btn" style="margin-top: 10px;" onclick="saveEditorContent()">Save & Back to Menu</button>
+    </div>
+  </div>
+
+<script>
+let role = "", story="", questions=[], currentQ=0, score=0;
+let tempQuestions = [];
+
+function selectRole(r) {
+  role = r;
+  document.getElementById("inputLabel").textContent = role === "teacher" ? "Enter Passcode" : "Enter Last Name";
+  goToPage("page2");
+}
+
+function handleLogin() {
+  const input = document.getElementById("userInput").value.trim();
+  if (role === "student" && input) {
+    loadStudentMenu();
+  } else if (role === "teacher" && input.toLowerCase() === "admin") {
+    loadTeacherMenu();
+  } else {
+    alert("Invalid input.");
+  }
+}
+
+function loadStudentMenu() {
+  document.getElementById("menuButtons").innerHTML = `
+    <button class="btn" onclick="goStart()">Start Game</button>
+    <button class="btn" onclick="location.reload()">Logout</button>`;
+  goToPage("menuPage");
+}
+
+function loadTeacherMenu() {
+  document.getElementById("menuButtons").innerHTML = `
+    <button class="btn" onclick="goStart()">Start Game</button>
+    <button class="btn" onclick="goEditor()">Edit Content</button>
+    <button class="btn" onclick="location.reload()">Logout</button>`;
+  goToPage("menuPage");
+}
+
+function goStart() {
+  story = localStorage.getItem("story")||"";
+  questions = JSON.parse(localStorage.getItem("questions")||"[]");
+  document.getElementById("storyText").innerText = story || "[No story found]";
+  goToPage("storyPage");
+}
+
+function doneReading() {
+  currentQ=0; score=0;
+  goToPage("gamePage");
+  displayQ();
+}
+
+function displayQ() {
+  if(currentQ >= questions.length){
+    alert(`Game over! Score: ${score}/${questions.length}`);
+    goToPage("menuPage");
+    return;
+  }
+  const q = questions[currentQ];
+  document.getElementById("questionText").innerText = "Question: " + q.question;
+  document.getElementById("scoreDisplay").innerText = "Score: " + score;
+  const area = document.getElementById("balloonArea");
+  area.innerHTML = "";
+  q.answers.forEach((a,i) => {
+    const b = document.createElement("div");
+    b.className = "balloon";
+    b.style.left = `${20 + i * 25}%`;
+    b.innerText = String.fromCharCode(65+i) + ".\n" + a;
+    b.onclick = () => {
+      if (i === q.correct) score++;
+      currentQ++;
+      displayQ();
+    };
+    area.appendChild(b);
+  });
+}
+
+function goEditor() {
+  document.getElementById("editStory").value = localStorage.getItem("story") || "";
+  tempQuestions = JSON.parse(localStorage.getItem("questions") || "[]");
+  goToPage("editorPage");
+}
+
+function addQuestion() {
+  const q = document.getElementById("qText").value.trim();
+  const c1 = document.getElementById("choice1").value.trim();
+  const c2 = document.getElementById("choice2").value.trim();
+  const c3 = document.getElementById("choice3").value.trim();
+  const correct = parseInt(document.getElementById("correctIndex").value);
+
+  if (!q || !c1 || !c2 || !c3 || isNaN(correct) || correct < 1 || correct > 3) {
+    alert("Please complete all fields with valid input.");
+    return;
+  }
+
+  tempQuestions.push({
+    question: q,
+    answers: [c1, c2, c3],
+    correct: correct - 1
+  });
+
+  document.getElementById("qText").value = "";
+  document.getElementById("choice1").value = "";
+  document.getElementById("choice2").value = "";
+  document.getElementById("choice3").value = "";
+  document.getElementById("correctIndex").value = "";
+  alert("Question added!");
+}
+
+function saveEditorContent() {
+  localStorage.setItem("story", document.getElementById("editStory").value);
+  localStorage.setItem("questions", JSON.stringify(tempQuestions));
+  alert("Content saved!");
+  goToPage("menuPage");
+}
+
+function goToPage(id) {
+  ["page1", "page2", "menuPage", "storyPage", "gamePage", "editorPage"].forEach(pid => {
+    document.getElementById(pid).classList.toggle("hidden", pid !== id);
+  });
+}
+</script>
+
+</body>
+</html>
